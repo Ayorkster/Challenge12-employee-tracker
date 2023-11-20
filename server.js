@@ -1,22 +1,19 @@
-const express = require('express');
-const { default: inquirer } = require('inquirer');
-const { default: Choices } = require('inquirer/lib/objects/choices');
-// Import and require mysql2
+// const express = require('express');
+const dotenv = require('dotenv').config();
+const inquirer = require('inquirer');
 const mysql = require('mysql2');
 
-const PORT = process.env.PORT || 3001;
-const app = express();
+// const PORT = process.env.PORT || 3001;
+// const app = express();
 
 // Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+// app.use(express.urlencoded({ extended: false }));
+// app.use(express.json());
 
 const db = mysql.createConnection(
     {
       host: 'localhost',
-      // MySQL username,
       user: process.env.DB_USER,
-      // TODO: Add MySQL password here
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME
     },
@@ -24,8 +21,7 @@ const db = mysql.createConnection(
   );
   
   const init = () => {
-    inquirer
-        .prompt([
+    inquirer.prompt([
             {
                 type: 'list',
                 message:'What can I help you with today?',
@@ -111,7 +107,79 @@ const db = mysql.createConnection(
     }); 
   };
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  const addDept = () => {
+    inquirer
+        .prompt([
+           { 
+            type: 'input',
+            message: 'What would you like to call your new department?',
+            name: 'add_dept',
+           }
+        ])
+        .then((answers) => {
+            addNewDept(answers.add_dept);
+        });
+  };
+
+  const addNewDept = (newDept) => {
+    const query = "INSERT INTO department (department_name) VALUES (?)";
+    db.query(query, [newDept], (err, results) => {
+      if (err) {
+        console.log("Unable to add department", err);
+        return;
+      }
+      console.table(results);
+      viewDept();
+    });
+  };
+
+  const addEmp = () => {
+    inquirer
+        .prompt([
+           { 
+            type: 'input',
+            message: 'What is the Employees FIRST NAME?',
+            name: 'first_name',
+           },
+           { 
+            type: 'input',
+            message: 'What is the Employees LAST NAME?',
+            name: 'last_name',
+           },
+           { 
+            type: 'input',
+            message: 'What is the Employees ROLE?',
+            name: 'role',
+           },
+           { 
+            type: 'input',
+            message: 'Who is the Employees MANAGER?',
+            name: 'manager',
+           }
+        ])
+        .then((answers) => {
+            addNewEmp(answers.first_name,
+                answers.last_name,
+                answers.role,
+                answers.manager);
+        });
+  };
+
+  const addNewEmp = (first_name, last_name, role, manager) => {
+    const query = "INSERT INTO employee (first_name, last_name, role, manager) VALUES (?, ?, ?, ?)";
+    db.query(query, [firstName, lastName, role, manager], (err,results) => {
+        if(err){
+            console.log("unable to add employee", err);
+            return;
+        }
+        console.table(results);
+        viewEmp();
+    }); 
+  };
+  
+ init();
+
+// app.listen(PORT, () => {
+//     console.log(`Server running on port ${PORT}`);
+//   });
   
