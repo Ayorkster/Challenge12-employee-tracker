@@ -1,14 +1,8 @@
-// const express = require('express');
+
 const dotenv = require('dotenv').config();
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 
-// const PORT = process.env.PORT || 3001;
-// const app = express();
-
-// Express middleware
-// app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
 
 const db = mysql.createConnection(
     {
@@ -32,7 +26,6 @@ const db = mysql.createConnection(
                     'Add a Department',
                     'Add a Role',
                     'Add an Employee',
-                    'Update an Employee Role',
                 ],
                 name:'options'
             }
@@ -84,7 +77,7 @@ const db = mysql.createConnection(
   };
 
   const viewRole = ()=> {
-    const query = "SELECT * FROM role";
+    const query = "SELECT * FROM roles";
     db.query(query, (err,results) => {
         if(err){
             console.log("unable to view roles", err);
@@ -133,6 +126,47 @@ const db = mysql.createConnection(
     });
   };
 
+  const addRole = () => {
+    inquirer
+        .prompt([
+           { 
+            type: 'input',
+            message: 'What is the role CALLED?',
+            name: 'role_title',
+           },
+           { 
+            type: 'input',
+            message: 'What DEPARTMENT is the role in?',
+            name: 'department_name',
+           },
+           {
+            type: 'input',
+            message: 'What is this roles SALARY',
+            name: 'role_salary'
+           }
+        ])
+        .then((answers) => {
+            addNewRole(
+                answers.role_title,
+                answers.department_name,
+                answers.role_salary
+                );
+        });
+  };
+
+  const addNewRole = (role_title, department_name, role_salary) => {
+    const query = "INSERT INTO roles (role_title, department_name, role_salary) VALUES (?, ?, ?)";
+    db.query(query, [role_title, department_name, role_salary], (err, results) => {
+        if (err) {
+            console.log("Unable to add role", err);
+            return;
+        }
+        console.table(results);
+        viewRole()
+      
+    });
+};
+
   const addEmp = () => {
     inquirer
         .prompt([
@@ -149,25 +183,27 @@ const db = mysql.createConnection(
            { 
             type: 'input',
             message: 'What is the Employees ROLE?',
-            name: 'role',
+            name: 'roles',
            },
-           { 
+           {
             type: 'input',
-            message: 'Who is the Employees MANAGER?',
-            name: 'manager',
+            message: 'what DEPARTMENT does this employee work in?',
+            name: 'emp_dep',
            }
         ])
         .then((answers) => {
-            addNewEmp(answers.first_name,
+            addNewEmp(
+                answers.first_name,
                 answers.last_name,
-                answers.role,
-                answers.manager);
+                answers.roles,
+                answers.emp_dep
+                );
         });
   };
 
-  const addNewEmp = (first_name, last_name, role, manager) => {
-    const query = "INSERT INTO employee (first_name, last_name, role, manager) VALUES (?, ?, ?, ?)";
-    db.query(query, [firstName, lastName, role, manager], (err,results) => {
+  const addNewEmp = (first_Name, last_Name, roles, emp_dep) => {
+    const query = "INSERT INTO employee (first_name, last_name, roles, emp_dep) VALUES (?, ?, ?, ?)";
+    db.query(query, [first_Name, last_Name, roles, emp_dep], (err,results) => {
         if(err){
             console.log("unable to add employee", err);
             return;
