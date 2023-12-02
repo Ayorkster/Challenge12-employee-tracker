@@ -56,16 +56,12 @@ const db = mysql.createConnection(
                 case 'Add an Employee':
                     addEmp();
                     break;
-
-                case 'Update an Employee Role':
-                    updateEmpRole();
-                    break;
             }
         });
   };
 
   const viewDept = ()=> {
-    const query = "SELECT * FROM department";
+    const query = "SELECT id, department_name FROM department";
     db.query(query, (err,results) => {
         if(err){
             console.log("unable to retrieve departments", err);
@@ -77,7 +73,7 @@ const db = mysql.createConnection(
   };
 
   const viewRole = ()=> {
-    const query = "SELECT * FROM roles";
+    const query = "SELECT id, role_title, role_salary, department_name FROM roles";
     db.query(query, (err,results) => {
         if(err){
             console.log("unable to view roles", err);
@@ -89,7 +85,7 @@ const db = mysql.createConnection(
   };
 
   const viewEmp = ()=> {
-    const query = "SELECT * FROM employee";
+    const query = "SELECT  id, first_name, last_name, roles, emp_dep FROM employee";
     db.query(query, (err,results) => {
         if(err){
             console.log("unable to retrieve employees", err);
